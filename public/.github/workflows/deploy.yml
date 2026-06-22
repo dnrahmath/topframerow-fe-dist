@@ -1,0 +1,47 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+
+jobs:
+  staging:
+    name: Deploy to Staging
+    if: github.ref == 'refs/heads/develop'
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code from GitHub
+        uses: actions/checkout@v2
+
+      - name: Deploy to Staging with Make
+        run: |
+          make give-access-staging
+          cd /var/www/staging/topframerow-fe-dist
+          make force-pull-staging
+          make down-staging
+          make build-staging-nc
+          make up-staging
+          make give-access-staging
+
+  production:
+    name: Deploy to Production
+    if: github.ref == 'refs/heads/master'
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code from GitHub
+        uses: actions/checkout@v2
+
+      - name: Deploy to Production with Make
+        run: |
+          make give-access-production
+          cd /var/www/production/topframerow-fe-dist
+          make force-pull-production
+          make down-production
+          make build-production-nc
+          make up-production
+          make give-access-production
+
+
+
